@@ -10,7 +10,7 @@ import {
   aragonStates,
 } from "../utils/filters";
 import { yupResolver } from "@hookform/resolvers/yup";
-
+import { DateTime } from 'luxon';
 const Schema = yup.object().shape({
   email: yup
     .string()
@@ -80,12 +80,9 @@ export default function Home() {
   const [companies, setCompanies] = useState([]);
   const [noMatch, setNoMatch] = useState(false);
 
-  console.log(companies, "companies");
-
   const onSubmit = useCallback(
     async (data) => {
       try {
-        console.log(data, companies, "data");
         await addUser(data);
 
         let matchingCompany = null;
@@ -102,15 +99,13 @@ export default function Home() {
             filter.debtAmountMin <= data.debtAmount &&
             (!filter.debtAmountMax || filter.debtAmountMax >= data.debtAmount);
 
-          // Check if the current time is within the company's working hours
-          const currentTime =
-            new Date().getHours() + new Date().getMinutes() / 60;
+          const currentTimeInEST = DateTime.now().setZone('America/New_York');
+          const currentTime = currentTimeInEST.hour + currentTimeInEST.minute / 60;
 
           const workingTimeMatch =
             filter.workTimeStart <= currentTime &&
             filter.workTimeEnd >= currentTime;
 
-          // If all conditions match, this is the company we are looking for
           if (
             stateMatch &&
             debtTypeMatch &&
@@ -125,7 +120,6 @@ export default function Home() {
         if (matchingCompany) {
           setSuccess(true);
           setCompanyNumber(matchingCompany.phone);
-          console.log(matchingCompany, "matchingCompany");
         } else {
           setNoMatch(true);
           setSuccess(false);
