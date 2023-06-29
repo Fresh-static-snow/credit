@@ -153,7 +153,7 @@ export default function Home() {
       </Head>
       <main>
         <div className="flex items-center justify-center align-middle bg-center bg-cover h-[306px] relative" style={{ 
-            backgroundImage: "url('../public/background.png')",
+            backgroundImage: "url('./background.png')",
             objectFit: 'contain'
         }}>
           <svg
