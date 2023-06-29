@@ -151,7 +151,7 @@ export default function Home() {
             objectFit: 'contain'
         }}>
           <svg
-            className="z-[999] absolute top-0 left-[5%]"
+            className="z-[999] absolute top-0 left-[5%] sm:hidden"
             width="140"
             height="60"
             viewBox="0 0 140 60"
@@ -179,7 +179,7 @@ export default function Home() {
           </div>
         </div>
         <div className="w-full h-[20px] bg-[#237575]" />
-        <div className="w-[430px] mx-auto">
+        <div className="max-w-[430px] mx-auto">
           <h1 className="py-5 text-4xl text-center">Take a short survey</h1>
           {success ? (
             <button
