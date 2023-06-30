@@ -121,13 +121,13 @@ export default function Home() {
           }
 
           if (matchingCompany) {
-            setSuccess(true);
             setCompanyNumber(matchingCompany.phone);
           } else {
             setNoMatch(true);
-            setSuccess(false);
+            // setSuccess(false);
             console.error("No matching company found");
           }
+          setSuccess(true);
         }
       } catch (e) {
         console.error(e);
