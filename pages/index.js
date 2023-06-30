@@ -191,7 +191,7 @@ export default function Home() {
           {success ? (
             <button
               onClick={() => {
-                if (userCallable) {
+                if (userCallable && !noMatch) {
                   window.location.href = "tel:" + companyPhone;
                 } else {
                   console.error(
