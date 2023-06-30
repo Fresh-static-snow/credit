@@ -1,16 +1,14 @@
 /* eslint-disable react/no-unescaped-entities */
+import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, NumberInput, Select, TextInput } from "@mantine/core";
+import { DateTime } from "luxon";
 import Head from "next/head";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { useService } from "../utils/service";
-import {
-  allStates,
-  aragonStates,
-} from "../utils/filters";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { DateTime } from 'luxon';
+import { allStates, aragonStates } from "../utils/filters";
+
 const Schema = yup.object().shape({
   email: yup
     .string()
@@ -55,9 +53,11 @@ export default function Home() {
       debtAmountMax: null,
       workTimeStart: 11,
       workTimeEnd: 20,
-      phone: "8776491156",
+      phone: 8776491156,
     };
-    addCompany(aragonFilter);
+    if (aragonFilter) {
+      addCompany(aragonFilter);
+    }
   }, []);
 
   const {
@@ -87,43 +87,47 @@ export default function Home() {
 
         let matchingCompany = null;
 
-        for (let filterFunc of companies) {
-          let filter = filterFunc;
+        if (companies) {
+          for (let filterFunc of companies) {
+            let filter = filterFunc;
 
-          const stateMatch = filter.states.includes(data.state);
-          const debtTypeMatch = filter.debtTypes.filter(
-            (v) => v === data.debtType
-          );
+            const stateMatch = filter.states.includes(data.state);
+            const debtTypeMatch = filter.debtTypes.filter(
+              (v) => v === data.debtType
+            );
 
-          const debtAmountMatch =
-            filter.debtAmountMin <= data.debtAmount &&
-            (!filter.debtAmountMax || filter.debtAmountMax >= data.debtAmount);
+            const debtAmountMatch =
+              filter.debtAmountMin <= data.debtAmount &&
+              (!filter.debtAmountMax ||
+                filter.debtAmountMax >= data.debtAmount);
 
-          const currentTimeInEST = DateTime.now().setZone('America/New_York');
-          const currentTime = currentTimeInEST.hour + currentTimeInEST.minute / 60;
+            const currentTimeInEST = DateTime.now().setZone("America/New_York");
+            const currentTime =
+              currentTimeInEST.hour + currentTimeInEST.minute / 60;
 
-          const workingTimeMatch =
-            filter.workTimeStart <= currentTime &&
-            filter.workTimeEnd >= currentTime;
+            const workingTimeMatch =
+              filter.workTimeStart <= currentTime &&
+              filter.workTimeEnd >= currentTime;
 
-          if (
-            stateMatch &&
-            debtTypeMatch &&
-            debtAmountMatch &&
-            workingTimeMatch
-          ) {
-            matchingCompany = filter;
-            break;
+            if (
+              stateMatch &&
+              debtTypeMatch &&
+              debtAmountMatch &&
+              workingTimeMatch
+            ) {
+              matchingCompany = filter;
+              break;
+            }
           }
-        }
 
-        if (matchingCompany) {
-          setSuccess(true);
-          setCompanyNumber(matchingCompany.phone);
-        } else {
-          setNoMatch(true);
-          setSuccess(false);
-          console.error("No matching company found");
+          if (matchingCompany) {
+            setSuccess(true);
+            setCompanyNumber(matchingCompany.phone);
+          } else {
+            setNoMatch(true);
+            setSuccess(false);
+            console.error("No matching company found");
+          }
         }
       } catch (e) {
         console.error(e);
@@ -146,10 +150,13 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <div className="flex items-center justify-center align-middle bg-center bg-cover h-[306px] relative" style={{ 
+        <div
+          className="flex items-center justify-center align-middle bg-center bg-cover h-[306px] relative"
+          style={{
             backgroundImage: "url('./background.png')",
-            objectFit: 'contain'
-        }}>
+            objectFit: "contain",
+          }}
+        >
           <svg
             className="z-[999] absolute top-0 left-[5%] sm:hidden"
             width="140"
@@ -233,6 +240,7 @@ export default function Home() {
                 control={control}
                 required
                 placeholder="Your state*"
+                searchable
                 data={allStates}
                 onChange={(e) => setValue("state", e)}
                 style={inputCss}

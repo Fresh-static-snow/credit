@@ -10,14 +10,15 @@ export const useService = () => {
   };
 
   const addCompany = async (company) => {
-    const companies = await getDocs(collection(database, companyCollectionName));
+    const companies = await getDocs(
+      collection(database, companyCollectionName)
+    );
     const existingCompany = companies.docs.find(
       (doc) => doc.data().name === company.name
     );
     if (!existingCompany) {
       return addDoc(collection(database, companyCollectionName), company);
     } else return null;
-    // return addDoc(collection(database, companyCollectionName), company);
   };
 
   const getCompanies = async () => {

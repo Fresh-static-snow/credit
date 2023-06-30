@@ -1,22 +1,15 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-// APIKEY="AIzaSyCNFUZ4pPw1uXv0oEIP946eOBExAMRN35k",
-// AUTHDOMAIN="credit-app-5baa7.firebaseapp.com",
-// PROJECTID="credit-app-5baa7",
-// STORAGEBUCKET="credit-app-5baa7.appspot.com",
-// MESSAGINGSENDERID="17658799722",
-// APPID="1:17658799722:web:ed0e2f387c6bf2704bcc13"
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCNFUZ4pPw1uXv0oEIP946eOBExAMRN35k",
-    authDomain: "credit-app-5baa7.firebaseapp.com",
-    projectId: "credit-app-5baa7",
-    storageBucket: "credit-app-5baa7.appspot.com",
-    messagingSenderId: "17658799722",
-    appId: "1:17658799722:web:ed0e2f387c6bf2704bcc13"
-  };
+  apiKey: process.env.API_KEY,
+  authDomain: process.env.AUTH_DOMAIN,
+  projectId: process.env.PROJECT_ID,
+  storageBucket: process.env.STORAGE_BUCKET,
+  messagingSenderId: process.env.MESSAGING_SENDER_ID,
+  appId: process.env.APP_ID,
+};
 
-initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
 
-export const database = getFirestore();
-
+export const database = getFirestore(app);
