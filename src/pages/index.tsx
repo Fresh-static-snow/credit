@@ -202,7 +202,7 @@ export default function Home() {
           {success ? (
             <button
               onClick={() => {
-                if (userCallable && !noMatch) {
+                if (userCallable && !noMatch && companyPhone) {
                   window.location.href = "tel:" + companyPhone;
                 } else {
                   console.error(
