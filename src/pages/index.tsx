@@ -4,10 +4,19 @@ import { Button, NumberInput, Select, TextInput } from "@mantine/core";
 import { DateTime } from "luxon";
 import Head from "next/head";
 import { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { useService } from "../utils/service";
 import { allStates, aragonStates } from "../utils/filters";
+
+type FormType = {
+  email: string;
+  phone: string;
+  debtType: string;
+  debtAmount: number;
+  haveIncome: string;
+  state: string;
+}
 
 const Schema = yup.object().shape({
   email: yup
@@ -21,8 +30,24 @@ const Schema = yup.object().shape({
   state: yup.string().required("Required"),
 });
 
+const aragonFilter = {
+  name: "aragon",
+  states: aragonStates,
+  debtTypes: ["Сard Debt"],
+  debtAmountMin: 15000,
+  debtAmountMax: null,
+  workTimeStart: 11,
+  workTimeEnd: 20,
+  phone: 8776491156,
+};
+
 export default function Home() {
   const [userCallable, setUserCallable] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [companyPhone, setCompanyNumber] = useState("");
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [noMatch, setNoMatch] = useState(false);
+
   const { addUser, addCompany, getCompanies } = useService();
 
   useEffect(() => {
@@ -45,16 +70,7 @@ export default function Home() {
         navigator.userAgent
       )
     );
-    const aragonFilter = {
-      name: "aragon",
-      states: aragonStates,
-      debtTypes: ["Сard Debt"],
-      debtAmountMin: 15000,
-      debtAmountMax: null,
-      workTimeStart: 11,
-      workTimeEnd: 20,
-      phone: 8776491156,
-    };
+
     if (aragonFilter) {
       addCompany(aragonFilter);
     }
@@ -66,7 +82,7 @@ export default function Home() {
     handleSubmit,
     formState: { errors, isDirty, isValid },
     setValue,
-  } = useForm({
+  } = useForm<FormType>({
     resolver: yupResolver(Schema),
     mode: "all",
     defaultValues: {
@@ -75,12 +91,8 @@ export default function Home() {
       phone: "",
     },
   });
-  const [success, setSuccess] = useState(false);
-  const [companyPhone, setCompanyNumber] = useState("");
-  const [companies, setCompanies] = useState([]);
-  const [noMatch, setNoMatch] = useState(false);
 
-  const onSubmit = useCallback(
+  const onSubmit: SubmitHandler<FormType> = useCallback(
     async (data) => {
       try {
         await addUser(data);
@@ -93,7 +105,7 @@ export default function Home() {
 
             const stateMatch = filter.states.includes(data.state);
             const debtTypeMatch = filter.debtTypes.filter(
-              (v) => v === data.debtType
+              (v: any) => v === data.debtType
             );
 
             const debtAmountMatch =
@@ -101,19 +113,19 @@ export default function Home() {
               (!filter.debtAmountMax ||
                 filter.debtAmountMax >= data.debtAmount);
 
-            const currentTimeInEST = DateTime.now().setZone("America/New_York");
-            const currentTime =
-              currentTimeInEST.hour + currentTimeInEST.minute / 60;
-
-            const workingTimeMatch =
-              filter.workTimeStart <= currentTime &&
-              filter.workTimeEnd >= currentTime;
+            // const currentTimeInEST = DateTime.now().setZone("America/New_York");
+            // const currentTime =
+            //   currentTimeInEST.hour + currentTimeInEST.minute / 60;
+            // const workingTimeMatch =
+            //   filter.workTimeStart <= currentTime &&
+            //   filter.workTimeEnd >= currentTime;
 
             if (
               stateMatch &&
               debtTypeMatch &&
-              debtAmountMatch &&
-              workingTimeMatch
+              debtAmountMatch 
+              // &&
+              // workingTimeMatch
             ) {
               matchingCompany = filter;
               break;
@@ -124,7 +136,6 @@ export default function Home() {
             setCompanyNumber(matchingCompany.phone);
           } else {
             setNoMatch(true);
-            // setSuccess(false);
             console.error("No matching company found");
           }
           setSuccess(true);
@@ -203,7 +214,7 @@ export default function Home() {
               className="w-full h-[50px] bg-[#00FFFF] rounded-[30px]"
             >
               {userCallable && !noMatch && "Get a free consultation"}
-              {!userCallable && !noMatch && `Company phone - ${companyPhone}`}
+              {!userCallable && !noMatch && `Company phone - +${companyPhone}`}
               {noMatch && "We'll get back to you soon"}
             </button>
           ) : (
@@ -212,15 +223,15 @@ export default function Home() {
               className="flex flex-col gap-[24px] p-[15px]"
             >
               <Select
-                control={control}
+                // control={control}
                 required
                 placeholder="Debt type*"
                 data={["Card Debt", "Tax Debt", "Student Debt", "Medical Debt"]}
-                onChange={(e) => setValue("debtType", e)}
+                onChange={(e) => setValue("debtType", e ?? "Card Debt")}
                 style={inputCss}
               />
               <NumberInput
-                control={control}
+                // control={control}
                 defaultValue={1000}
                 parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 formatter={(value) =>
@@ -232,33 +243,32 @@ export default function Home() {
                     : "$ "
                 }
                 placeholder="Debt amount*"
-                required
-                onChange={(e) => setValue("debtAmount", e)}
+                required 
+                onChange={(e) => e && setValue("debtAmount", e)}
                 style={inputCss}
               />
               <Select
-                control={control}
+                // control={control}
                 required
                 placeholder="Your state*"
                 searchable
                 data={allStates}
-                onChange={(e) => setValue("state", e)}
+                onChange={(e) => e && setValue("state", e)}
                 style={inputCss}
               />
               <Select
-                control={control}
+                // control={control}
                 required
                 placeholder="Do you have income?*"
                 data={["Yes", "No"]}
-                onChange={(e) => setValue("haveIncome", e)}
+                onChange={(e) => e && setValue("haveIncome", e)}
                 style={inputCss}
               />
               <TextInput
                 placeholder="Write your email*"
                 required
                 type="email"
-                message={errors.email?.message}
-                error={!!errors.email}
+                error={!!errors.email && errors.email?.message}
                 {...register("email")}
                 style={inputCss}
               />
@@ -266,8 +276,7 @@ export default function Home() {
                 placeholder="Phone number*"
                 required
                 type="phone"
-                message={errors.email?.message}
-                error={!!errors.email}
+                error={!!errors.phone && errors.phone?.message}
                 {...register("phone")}
                 style={inputCss}
               />
@@ -358,7 +367,8 @@ export default function Home() {
             <h1 className="text-center text-4xl py-[50px]">
               Discover what our members are saying
             </h1>
-            <div className="flex md:flex-col gap-x-[60px] justify-center p-[15px] gap-y-[15px]">
+            {/* flex   justify-center */}
+            <div className="flex p-[15px] gap-x-[60px] gap-y-[15px] justify-center md:flex-col">
               <div className="flex flex-col w-[310px] h-min-[298px] 2xl:w-[100%] rounded-[20px] p-[25px] bg-white">
                 <h1 className="text-xl flex">
                   Marta R.{" "}
@@ -391,6 +401,7 @@ export default function Home() {
                   wonderful!"
                 </div>
               </div>
+
               <div className="flex flex-col w-[310px] h-min-[298px] 2xl:w-[100%] rounded-[20px] p-[25px] bg-white">
                 <h1 className="text-xl flex">
                   Ariel S.{" "}
@@ -423,6 +434,7 @@ export default function Home() {
                   and reliability are unmatched. Thank you for your hard work!"
                 </div>
               </div>
+
               <div className="flex flex-col w-[310px] h-min-[298px] 2xl:w-[100%] rounded-[20px] p-[25px] bg-white">
                 <h1 className="text-xl flex">
                   Liza W.{" "}
